@@ -24,4 +24,13 @@ export const electronPlatform = {
   getPlatform() {
     return bridge()?.getPlatform?.() ?? Promise.resolve(null);
   },
+  resolveHiAnime(args) {
+    return (
+      bridge()?.resolveHiAnime?.(args) ??
+      Promise.resolve({ ok: false, error: "HiAnime resolver unavailable" })
+    );
+  },
+  onHiAnimeProgress(cb) {
+    return bridge()?.onHiAnimeProgress?.(cb) ?? (() => {});
+  },
 };

@@ -9,6 +9,8 @@
 //   secureStorage.remove(key) -> Promise<void>
 //   openExternal(url) -> Promise<void>
 //   getPlatform() -> Promise<string|null>
+//   resolveHiAnime(args) -> Promise<{ok:true,...}|{ok:false,error}>
+//   onHiAnimeProgress(cb) -> unsubscribe fn
 
 import { Capacitor } from "@capacitor/core";
 import { electronPlatform } from "./electron";
@@ -30,6 +32,12 @@ const webPlatform = {
   },
   getPlatform() {
     return Promise.resolve("web");
+  },
+  resolveHiAnime() {
+    return Promise.resolve({ ok: false, error: "HiAnime resolver unavailable" });
+  },
+  onHiAnimeProgress() {
+    return () => {};
   },
 };
 

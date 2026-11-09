@@ -29,6 +29,7 @@ import {
   sourceUsesCleanUa,
   getNextNonAsyncSource,
 } from "../utils/api";
+import { platform } from "../platform";
 import {
   PlayIcon,
   BookmarkIcon,
@@ -401,7 +402,7 @@ export default function MoviePage({
     setResolveError(null);
     const startTime = storage.get("dlTime_" + progressKey) || 0;
     let mounted = true;
-    window.electron
+    platform
       .resolveHiAnime({
         title,
         seasonNumber: 1,
@@ -413,7 +414,7 @@ export default function MoviePage({
         if (!mounted) return;
         if (res?.ok && res.url) {
           clearFailoverSource(epKey);
-          if (res.isDirectMp4 !== undefined) {
+          if (res.isDirectMp4 !== undefined && platform.isElectron) {
             window.electron
               .setPlayerVideo({
                 url: res.url,

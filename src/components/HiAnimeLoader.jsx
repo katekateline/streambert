@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { platform } from "../platform";
 
 // Loading overlay content shown while the main process scrapes HiAnime.
 // Subscribes to "hianime-progress" events and renders the lookup steps.
@@ -15,7 +16,7 @@ export default function HiAnimeLoader({ what = "episode", playerStarting }) {
 
   useEffect(() => {
     setStage("search");
-    const off = window.electron?.onHiAnimeProgress?.((s) => {
+    const off = platform.onHiAnimeProgress?.((s) => {
       if (s) setStage(s);
     });
     return () => {

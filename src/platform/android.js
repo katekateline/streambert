@@ -4,6 +4,7 @@
 import { registerPlugin } from "@capacitor/core";
 
 const NativeSecureStorage = registerPlugin("SecureStorage");
+const NativeHiAnime = registerPlugin("HiAnime");
 
 export const androidPlatform = {
   kind: "android",
@@ -46,5 +47,14 @@ export const androidPlatform = {
   },
   getPlatform() {
     return Promise.resolve("android");
+  },
+  resolveHiAnime(args) {
+    return NativeHiAnime.resolve(args);
+  },
+  onHiAnimeProgress(cb) {
+    const pending = NativeHiAnime.addListener("progress", (event) => cb(event.stage));
+    return () => {
+      pending.then((handle) => handle.remove()).catch(() => {});
+    };
   },
 };

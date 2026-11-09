@@ -37,6 +37,7 @@ import {
   sourceUsesCleanUa,
   getNextNonAsyncSource,
 } from "../utils/api";
+import { platform } from "../platform";
 import {
   BookmarkIcon,
   BookmarkFillIcon,
@@ -800,7 +801,7 @@ export default function TVPage({
     const progressKey = `tv_${item.id}_s${selectedSeason}e${epNum}`;
     const startTime = storage.get("dlTime_" + progressKey) || 0;
     let mounted = true;
-    window.electron
+    platform
       .resolveHiAnime({
         title,
         seasonNumber: selectedSeason,
@@ -811,7 +812,7 @@ export default function TVPage({
         if (!mounted) return;
         if (res?.ok && res.url) {
           clearFailoverSource(epKey);
-          if (res.isDirectMp4 !== undefined) {
+          if (res.isDirectMp4 !== undefined && platform.isElectron) {
             window.electron
               .setPlayerVideo({
                 url: res.url,
