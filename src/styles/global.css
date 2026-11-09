@@ -4057,3 +4057,269 @@ html[data-win-titlebar][data-maximized] .main {
 .episode-check-item:hover {
     color: var(--text) !important;
 }
+
+/* ── Settings content shell (padding moved out of inline style) ────────── */
+.settings-content {
+    padding: 40px 48px 80px;
+}
+
+/* ── Android / mobile layout ───────────────────────────────────────────────
+   Every rule below is scoped to Android so the desktop layout is untouched. */
+html[data-platform="android"] body,
+html[data-platform="android"] #root {
+    overflow-x: hidden;
+}
+
+html[data-platform="android"] .main {
+    margin-left: 0;
+    height: 100dvh;
+    padding-bottom: calc(
+        64px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom))
+    );
+    -webkit-overflow-scrolling: touch;
+}
+
+html[data-platform="android"] .mobile-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 150;
+    display: flex;
+    height: calc(
+        56px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom))
+    );
+    padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom));
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+}
+
+html[data-platform="android"] .mobile-nav-btn {
+    flex: 1;
+    min-height: 56px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border: none;
+    background: none;
+    color: var(--text3);
+    font-family: var(--font-body);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html[data-platform="android"] .mobile-nav-btn svg {
+    width: 22px;
+    height: 22px;
+}
+
+html[data-platform="android"] .mobile-nav-btn.active {
+    color: var(--red);
+}
+
+html[data-platform="android"] .hero {
+    height: min(70vh, 460px);
+    min-height: 320px;
+}
+
+html[data-platform="android"] .hero-content {
+    padding: 24px 16px 28px;
+    max-width: none;
+}
+
+html[data-platform="android"] .hero-title {
+    font-size: clamp(38px, 12vw, 54px);
+}
+
+html[data-platform="android"] .hero-overview {
+    font-size: 13px;
+}
+
+html[data-platform="android"] .section {
+    padding: 14px 16px;
+}
+
+html[data-platform="android"] .section-title {
+    font-size: 22px;
+    margin-bottom: 10px;
+}
+
+html[data-platform="android"] .cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+    gap: 10px;
+}
+
+html[data-platform="android"] .scroll-row {
+    gap: 10px;
+}
+
+html[data-platform="android"] .scroll-row .card {
+    width: 112px;
+}
+
+html[data-platform="android"] .btn {
+    padding: 11px 16px;
+    font-size: 13px;
+}
+
+html[data-platform="android"] .detail-hero {
+    min-height: 0;
+}
+
+html[data-platform="android"] .detail-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    padding: 24px 16px 20px;
+}
+
+html[data-platform="android"] .detail-poster {
+    width: 116px;
+}
+
+html[data-platform="android"] .detail-title {
+    font-size: 38px;
+    margin-bottom: 10px;
+}
+
+html[data-platform="android"] .detail-meta {
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+html[data-platform="android"] .detail-overview {
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+html[data-platform="android"] .detail-actions {
+    gap: 8px;
+}
+
+html[data-platform="android"] .episodes-grid {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+html[data-platform="android"] .season-selector {
+    overflow-x: auto;
+    padding-bottom: 6px;
+}
+
+html[data-platform="android"] .library-header {
+    padding: 28px 16px 0;
+}
+
+html[data-platform="android"] .library-title {
+    font-size: 36px;
+}
+
+html[data-platform="android"] .library-section {
+    padding: 20px 16px;
+}
+
+html[data-platform="android"] .settings-content {
+    padding: 20px 16px
+        calc(40px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom)));
+}
+
+html[data-platform="android"] .settings-title {
+    font-size: 36px !important;
+}
+
+html[data-platform="android"] .settings-topbar {
+    padding: var(--safe-area-inset-top, env(safe-area-inset-top)) 12px 0 !important;
+}
+
+html[data-platform="android"] .modal-overlay {
+    padding: 0;
+    align-items: stretch;
+}
+
+html[data-platform="android"] .search-box {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    border: none;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--safe-area-inset-top, env(safe-area-inset-top));
+    padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom));
+}
+
+html[data-platform="android"] .search-input-wrap {
+    padding: 14px 16px;
+}
+
+html[data-platform="android"] .search-input {
+    font-size: 16px;
+}
+
+html[data-platform="android"] .search-results {
+    max-height: none;
+    flex: 1;
+    overflow-y: auto;
+}
+
+html[data-platform="android"] .apikey-modal {
+    padding: var(--safe-area-inset-top, env(safe-area-inset-top)) 16px
+        var(--safe-area-inset-bottom, env(safe-area-inset-bottom));
+    overflow-y: auto;
+}
+
+html[data-platform="android"] .apikey-box {
+    padding: 28px 20px;
+}
+
+html[data-platform="android"] .apikey-logo {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 12px;
+}
+
+html[data-platform="android"] .apikey-title {
+    font-size: 38px;
+}
+
+html[data-platform="android"] .apikey-sub {
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+html[data-platform="android"] .toast {
+    left: 16px;
+    right: 16px;
+    bottom: calc(
+        72px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom))
+    );
+    text-align: center;
+}
+
+html[data-platform="android"] .episode-check-pill {
+    left: 12px !important;
+    right: 12px;
+    bottom: calc(
+        72px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom))
+    ) !important;
+    min-width: 0 !important;
+    max-width: none !important;
+}
+
+html[data-platform="android"] .mobile-platform-notice {
+    margin-bottom: 28px;
+    padding: 12px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--red);
+    border-radius: var(--radius);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text2);
+}

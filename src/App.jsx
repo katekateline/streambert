@@ -11,6 +11,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import KeyboardShortcutsModal from "./components/KeyboardShortcutsModal";
 import WindowTitlebar from "./components/WindowTitlebar";
 import { storage, secureStorage, STORAGE_KEYS } from "./utils/storage";
+import { platform as appPlatform } from "./platform";
 import {
   applyAccentColor,
   applyTheme,
@@ -28,6 +29,7 @@ import {
 } from "./utils/discordPresence";
 
 import Sidebar from "./components/Sidebar";
+import MobileNav from "./components/MobileNav";
 import SearchModal from "./components/SearchModal";
 import SetupScreen from "./components/SetupScreen";
 import CloseConfirmModal from "./components/CloseConfirmModal";
@@ -52,7 +54,11 @@ export default function App() {
   const [apiKeyLoaded, setApiKeyLoaded] = useState(false);
   const [skipped, setSkipped] = useState(false);
   const [apiKeyStatus, setApiKeyStatus] = useState("checking"); // 'checking' | 'ok' | 'invalid_token' | 'unreachable'
-  const [page, setPage] = useState(() => storage.get("startPage") || "home");
+  const [page, setPage] = useState(() => {
+    const startPage = storage.get("startPage") || "home";
+    // Android MVP has no downloads screen; ignore a desktop-only start page.
+    return appPlatform.isAndroid && startPage === "downloads" ? "home" : startPage;
+  });
   const [selected, setSelected] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
   const [dlSearchOpen, setDlSearchOpen] = useState(false);
@@ -141,6 +147,7 @@ export default function App() {
 
   // ── Startup update check ─────────────────────────────────────────────────
   useEffect(() => {
+    if (!appPlatform.isElectron) return;
     if (!storage.get("autoCheckUpdates")) return;
     const source =
       storage.get(STORAGE_KEYS.UPDATE_SOURCE) || DEFAULT_UPDATE_SOURCE;
@@ -351,9 +358,9 @@ export default function App() {
 
   // ── Detect platform for Windows titlebar ──────────────────────────────────
   useEffect(() => {
-    if (!window.electron?.getPlatform) return;
+    if (!appPlatform.isElectron) return;
     let mounted = true;
-    window.electron.getPlatform().then((p) => {
+    appPlatform.getPlatform().then((p) => {
       if (!mounted) return;
       setPlatform(p);
       if (p === "win32" || p === "linux") {
@@ -995,18 +1002,26 @@ export default function App() {
     <ErrorBoundary>
       {hasCustomTitlebar && <WindowTitlebar />}
       <div>
-        <Sidebar
-          page={page}
-          onNavigate={navigate}
-          onSearch={() => setShowSearch(true)}
-          savedList={savedList}
-          activeDownloads={activeDownloadCount}
-          onReorderSaved={handleReorderSaved}
-          onRemoveSaved={toggleSave}
-          canGoBack={navStack.length > 0}
-          onBack={navigateBack}
-          onShowShortcuts={() => setShowShortcuts(true)}
-        />
+        {appPlatform.isAndroid ? (
+          <MobileNav
+            page={page}
+            onNavigate={navigate}
+            onSearch={() => setShowSearch(true)}
+          />
+        ) : (
+          <Sidebar
+            page={page}
+            onNavigate={navigate}
+            onSearch={() => setShowSearch(true)}
+            savedList={savedList}
+            activeDownloads={activeDownloadCount}
+            onReorderSaved={handleReorderSaved}
+            onRemoveSaved={toggleSave}
+            canGoBack={navStack.length > 0}
+            onBack={navigateBack}
+            onShowShortcuts={() => setShowShortcuts(true)}
+          />
+        )}
 
         <div className="main">
           {/* ── API key status banner ── */}
@@ -1237,6 +1252,7 @@ export default function App() {
         {/* ── Episode check status pill / result card ── */}
         {episodeCheckStatus && (
           <div
+            className="episode-check-pill"
             style={{
               position: "fixed",
               bottom: 24,

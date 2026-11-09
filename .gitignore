@@ -2,5 +2,15 @@ node_modules/
 temp/
 download_config.ini
 dist/
+dist-android/
 *.zip
 *secret.txt
+
+# Android / Capacitor
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+*.keystore
+*.jks

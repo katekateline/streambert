@@ -3,10 +3,12 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig(({ mode }) => {
   const isDist = process.env.ELECTRON_DIST === "1";
+  const isCapacitor = process.env.CAPACITOR_BUILD === "1";
   return {
     plugins: [react()],
     base: "./",
     build: {
+      outDir: isCapacitor ? "dist-android" : "dist",
       minify: "terser",
       terserOptions: {
         compress: {

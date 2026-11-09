@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { StreambertLogo, PlayIcon } from "./Icons";
+import { platform } from "../platform";
 
 const TMDB_BASE = "https://api.themoviedb.org/3";
 
@@ -78,7 +79,7 @@ function ExternalLink({ href, className, children }) {
       href={href}
       onClick={(e) => {
         e.preventDefault();
-        window.electron.openExternal(href);
+        platform.openExternal(href);
       }}
     >
       {children}

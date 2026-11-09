@@ -1,5 +1,7 @@
 // localStorage-based persistence (works in both Vite dev and prod)
 
+import { platform } from "../platform";
+
 const PREFIX = "streambert_";
 
 export const storage = {
@@ -142,7 +144,7 @@ export const clearFailoverSource = (epKey) => {
 // ── Shared helpers ────────────────────────────────────────────────────────────
 
 /** True when running inside Electron (contextBridge exposed). */
-export const isElectron = typeof window !== "undefined" && !!window.electron;
+export const isElectron = platform.isElectron;
 
 /** Format a byte count into a human-readable string. */
 export function formatBytes(bytes) {
@@ -157,28 +159,28 @@ export function formatBytes(bytes) {
 }
 
 // ── Secure storage for sensitive keys ────────────────────────────────────────
-// Uses Electron safeStorage (OS keychain / DPAPI / libsecret).
-// All methods are async. Non-Electron environments silently fall back to no-op.
+// Uses Electron safeStorage or the Android Keystore plugin via the platform
+// adapter. All methods are async and resolve safely when no backend exists.
 //
 // Sensitive keys managed here (NOT stored in localStorage):
 //   "apikey"      - TMDB API key
 //   "subdlApiKey" - SubDL API key
 //   "wyzieApiKey" - Wyzie API key
 
-const _isElectronSecure =
-  typeof window !== "undefined" && !!window.electron?.secureGet;
-
 export const secureStorage = {
   /** Read an encrypted value. Returns null if not set. */
   async get(key) {
-    if (!_isElectronSecure) return null;
-    return window.electron.secureGet(key);
+    return platform.secureStorage.get(key);
   },
 
   /** Write an encrypted value. Pass null/empty to delete. */
   async set(key, value) {
-    if (!_isElectronSecure) return;
-    return window.electron.secureSet(key, value ?? "");
+    return platform.secureStorage.set(key, value);
+  },
+
+  /** Delete an encrypted value. */
+  async remove(key) {
+    return platform.secureStorage.remove(key);
   },
 };
 

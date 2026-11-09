@@ -32,6 +32,7 @@ import {
 } from "../utils/homeLayout";
 import { collectBackupData, restoreBackupData } from "../utils/backup";
 import { formatBytes } from "../utils/storage";
+import { platform } from "../platform";
 
 // ── Custom Select ─────────────────────────────────────────────────────────────
 function SettingsSelect({ value, onChange, options, style }) {
@@ -597,6 +598,7 @@ function VersionSection() {
           marginBottom: 20,
         }}
       >
+        {isElectron && (
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: 13, color: "var(--text3)" }}>
             Current version
@@ -615,46 +617,57 @@ function VersionSection() {
             v{currentVersion}
           </code>
         </div>
+        )}
 
-        <button
-          className="btn btn-ghost"
-          disabled={checking}
-          onClick={runCheck}
-          style={{ opacity: checking ? 0.6 : 1 }}
-        >
-          {checking ? "Checking…" : "Check for Updates"}
-        </button>
+        {isElectron && (
+          <button
+            className="btn btn-ghost"
+            disabled={checking}
+            onClick={runCheck}
+            style={{ opacity: checking ? 0.6 : 1 }}
+          >
+            {checking ? "Checking…" : "Check for Updates"}
+          </button>
+        )}
 
         {/* Update source toggle */}
-        <div
-          style={{
-            display: "inline-flex",
-            border: "1px solid var(--border)",
-            borderRadius: 8,
-            overflow: "hidden",
-          }}
-        >
-          {Object.values(UPDATE_SOURCES).map((src) => (
-            <button
-              key={src.id}
-              onClick={() => changeSource(src.id)}
-              disabled={checking}
-              title={`Check for updates via ${src.label}`}
-              style={{
-                border: "none",
-                padding: "6px 12px",
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: checking ? "not-allowed" : "pointer",
-                background:
-                  updateSource === src.id ? "var(--red)" : "var(--surface2)",
-                color: updateSource === src.id ? "#fff" : "var(--text3)",
-              }}
-            >
-              {src.label}
-            </button>
-          ))}
-        </div>
+        {isElectron && (
+          <div
+            style={{
+              display: "inline-flex",
+              border: "1px solid var(--border)",
+              borderRadius: 8,
+              overflow: "hidden",
+            }}
+          >
+            {Object.values(UPDATE_SOURCES).map((src) => (
+              <button
+                key={src.id}
+                onClick={() => changeSource(src.id)}
+                disabled={checking}
+                title={`Check for updates via ${src.label}`}
+                style={{
+                  border: "none",
+                  padding: "6px 12px",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: checking ? "not-allowed" : "pointer",
+                  background:
+                    updateSource === src.id ? "var(--red)" : "var(--surface2)",
+                  color: updateSource === src.id ? "#fff" : "var(--text3)",
+                }}
+              >
+                {src.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {!isElectron && (
+          <span style={{ fontSize: 13, color: "var(--text3)" }}>
+            Updates are installed outside the app in this Android preview.
+          </span>
+        )}
 
         {result && !result.error && result.hasUpdate && (
           <button
@@ -712,32 +725,36 @@ function VersionSection() {
       )}
 
       {/* Auto-check toggle */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          flexWrap: "wrap",
-        }}
-      >
-        <Toggle
-          value={autoCheck}
-          onChange={toggleAuto}
-          title={autoCheck ? "Disable auto-check" : "Enable auto-check"}
-        />
-        <div>
-          <div style={{ fontSize: 14, fontWeight: 500, color: "var(--text)" }}>
-            Check for updates on startup
+      {isElectron && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            flexWrap: "wrap",
+          }}
+        >
+          <Toggle
+            value={autoCheck}
+            onChange={toggleAuto}
+            title={autoCheck ? "Disable auto-check" : "Enable auto-check"}
+          />
+          <div>
+            <div
+              style={{ fontSize: 14, fontWeight: 500, color: "var(--text)" }}
+            >
+              Check for updates on startup
+            </div>
+            <div style={{ fontSize: 12, color: "var(--text3)", marginTop: 2 }}>
+              Shows a notification banner if a new version is available. Turned
+              on by default.
+            </div>
           </div>
-          <div style={{ fontSize: 12, color: "var(--text3)", marginTop: 2 }}>
-            Shows a notification banner if a new version is available. Turned on
-            by default.
-          </div>
+          {autoSaved && (
+            <span style={{ fontSize: 12, color: "#48c774" }}>✓ Saved</span>
+          )}
         </div>
-        {autoSaved && (
-          <span style={{ fontSize: 12, color: "#48c774" }}>✓ Saved</span>
-        )}
-      </div>
+      )}
     </div>
   );
 }
@@ -1838,7 +1855,9 @@ function StartPageSection() {
           options={[
             { value: "home", label: "🏠  Home" },
             { value: "history", label: "🕐  Library / History" },
-            { value: "downloads", label: "⬇  Downloads" },
+            ...(isElectron
+              ? [{ value: "downloads", label: "⬇  Downloads" }]
+              : []),
           ]}
         />
         <button className="btn btn-primary" onClick={handleSave}>
@@ -2005,7 +2024,7 @@ function SubtitleSettingsSection() {
             textDecoration: "underline",
           }}
           onClick={() =>
-            window.electron?.openExternal("https://subdl.com/settings")
+            platform.openExternal("https://subdl.com/settings")
           }
         >
           SubDL API key
@@ -2115,7 +2134,7 @@ function SubtitleSettingsSection() {
                   cursor: "pointer",
                 }}
                 onClick={() =>
-                  window.electron?.openExternal(
+                  platform.openExternal(
                     "https://codeberg.org/truelockmc/streambert/src/branch/main/wyzie-tutorial.md",
                   )
                 }
@@ -2161,7 +2180,7 @@ function SubtitleSettingsSection() {
                   className="btn btn-ghost"
                   style={{ padding: "6px 12px", fontSize: 12 }}
                   onClick={() =>
-                    window.electron?.openExternal(
+                    platform.openExternal(
                       `https://store.wyzie.io/dashboard?key=${wyzieApiKey.trim()}`,
                     )
                   }
@@ -2186,7 +2205,7 @@ function SubtitleSettingsSection() {
                   fontSize: 11,
                 }}
                 onClick={() =>
-                  window.electron?.openExternal("https://subdl.com/settings")
+                  platform.openExternal("https://subdl.com/settings")
                 }
               >
                 (free, register at subdl.com ↗)
@@ -2945,6 +2964,7 @@ function SettingsTopBar({ sectionRefs, contentRef }) {
 
   return (
     <div
+      className="settings-topbar"
       style={{
         position: "sticky",
         top: 0,
@@ -3184,20 +3204,22 @@ function SettingsTopBar({ sectionRefs, contentRef }) {
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
               Search settings…
-              <span
-                style={{
-                  fontSize: 10,
-                  color: "var(--text3)",
-                  background: "var(--surface)",
-                  border: "1px solid var(--border)",
-                  borderRadius: 4,
-                  padding: "1px 6px",
-                  fontFamily: "monospace",
-                  letterSpacing: 0.5,
-                }}
-              >
-                ⌘K
-              </span>
+              {isElectron && (
+                <span
+                  style={{
+                    fontSize: 10,
+                    color: "var(--text3)",
+                    background: "var(--surface)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 4,
+                    padding: "1px 6px",
+                    fontFamily: "monospace",
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  ⌘K
+                </span>
+              )}
             </button>
           )}
         </div>
@@ -3618,11 +3640,11 @@ export default function SettingsPage({
 
       <div
         ref={contentRef}
-        className="fade-in"
-        style={{ padding: "40px 48px 80px" }}
+        className="fade-in settings-content"
       >
         {/* Page title */}
         <div
+          className="settings-title"
           style={{
             fontFamily: "var(--font-display)",
             fontSize: 48,
@@ -3635,6 +3657,14 @@ export default function SettingsPage({
         <div style={{ color: "var(--text3)", fontSize: 14, marginBottom: 48 }}>
           App configuration for Streambert
         </div>
+
+        {platform.isAndroid && (
+          <div className="mobile-platform-notice">
+            Android preview: downloads, updates, backups, Discord presence and
+            playback are not available yet. Your watchlist, history and
+            appearance settings work normally.
+          </div>
+        )}
 
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* GROUP: GENERAL                                                     */}
@@ -4337,6 +4367,11 @@ export default function SettingsPage({
             subtitle="Export your data or restore from a previous backup file"
           />
           <BackupRestoreSection />
+          {!isElectron && (
+            <div style={{ fontSize: 13, color: "var(--text3)" }}>
+              Backup &amp; restore is not available in the Android preview.
+            </div>
+          )}
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════ */}
@@ -4357,19 +4392,23 @@ export default function SettingsPage({
             }}
           >
             {/* Install location */}
-            <div style={{ padding: "22px 24px" }}>
-              <CleanRow
-                title="Install Location"
-                description="Opens the folder where Streambert is installed."
-                buttonLabel="Open Folder"
-                onAction={async () => {
-                  const p = await window.electron?.getInstallPath?.();
-                  if (p) window.electron.openPath(p);
-                }}
-              />
-            </div>
+            {isElectron && (
+              <>
+                <div style={{ padding: "22px 24px" }}>
+                  <CleanRow
+                    title="Install Location"
+                    description="Opens the folder where Streambert is installed."
+                    buttonLabel="Open Folder"
+                    onAction={async () => {
+                      const p = await window.electron?.getInstallPath?.();
+                      if (p) window.electron.openPath(p);
+                    }}
+                  />
+                </div>
 
-            <div style={{ height: 1, background: "var(--border)" }} />
+                <div style={{ height: 1, background: "var(--border)" }} />
+              </>
+            )}
 
             {/* Cache */}
             <div style={{ padding: "22px 24px" }}>
