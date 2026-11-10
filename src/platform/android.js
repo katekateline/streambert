@@ -5,6 +5,7 @@ import { registerPlugin } from "@capacitor/core";
 
 const NativeSecureStorage = registerPlugin("SecureStorage");
 const NativeHiAnime = registerPlugin("HiAnime");
+const NativePlayer = registerPlugin("Player");
 
 export const androidPlatform = {
   kind: "android",
@@ -56,5 +57,14 @@ export const androidPlatform = {
     return () => {
       pending.then((handle) => handle.remove()).catch(() => {});
     };
+  },
+  player: {
+    // Resolves when PlayerActivity closes (startActivityForResult).
+    open(args) {
+      return NativePlayer.open(args);
+    },
+    getProgress(id) {
+      return NativePlayer.getProgress({ id });
+    },
   },
 };

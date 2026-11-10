@@ -3,14 +3,16 @@ package com.truelockmc.streambert
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.result.ActivityResult
 import com.getcapacitor.JSObject
 import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
+import com.getcapacitor.annotation.ActivityCallback
 import com.getcapacitor.annotation.CapacitorPlugin
 
 // Opens the native Media3 player and exposes saved playback progress.
-// Phase 5 wires the React Play buttons and history to this plugin.
+// `open` resolves only after PlayerActivity closes so React can sync progress.
 @CapacitorPlugin(name = "Player")
 class PlayerPlugin : Plugin() {
     @PluginMethod
@@ -57,8 +59,18 @@ class PlayerPlugin : Plugin() {
                 (call.getDouble("startPosition") ?: 0.0).toLong().coerceAtLeast(0L),
             )
         }
-        context.startActivity(intent)
-        call.resolve()
+        try {
+            startActivityForResult(call, intent, "onPlayerClosed")
+        } catch (e: Exception) {
+            call.reject(e.message ?: "Unable to start player")
+        }
+    }
+
+    // Keeps the JS call pending while PlayerActivity is open; PlayerActivity
+    // saves progress on pause/stop/destroy, so JS reads getProgress right after.
+    @ActivityCallback
+    fun onPlayerClosed(call: PluginCall?, result: ActivityResult) {
+        call?.resolve()
     }
 
     @PluginMethod

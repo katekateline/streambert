@@ -76,6 +76,7 @@ import {
 import { useSourceId } from "../utils/useSourceId";
 import { setPlayerGamepadActive } from "../utils/gamepadPlayerState";
 import HiAnimeLoader from "../components/HiAnimeLoader";
+import { ANDROID_ANIME_ONLY, startNativePlayback } from "../utils/nativePlayer";
 
 export default function MoviePage({
   item,
@@ -142,6 +143,7 @@ export default function MoviePage({
   const [collection, setCollection] = useState(null); // { name, parts }
   // Webview loading overlay
   const [webviewLoading, setWebviewLoading] = useState(false);
+  const [androidNotice, setAndroidNotice] = useState(null);
 
   // ID the selected source expects (TMDB id, or converted IMDb id)
   const srcId = useSourceId(playerSource, "movie", item.id, apiKey);
@@ -414,6 +416,37 @@ export default function MoviePage({
         if (!mounted) return;
         if (res?.ok && res.url) {
           clearFailoverSource(epKey);
+          if (platform.isAndroid) {
+            // Native Media3 player: no webview on Android.
+            resolvedPlayerUrlRef.current = res.url;
+            setResolvedPlayerUrl(res.url);
+            startNativePlayback({
+              url: res.url,
+              referer: res.referer,
+              subtitle: res.subtitle,
+              isDirectMp4: !!res.isDirectMp4,
+              mediaId: progressKey,
+              title: mediaName,
+              watchedThreshold,
+            })
+              .then((summary) => {
+                if (summary) {
+                  saveProgressRef.current(progressKey, summary.pct);
+                  storage.set("dlTime_" + progressKey, summary.seconds);
+                  if (summary.watched)
+                    onMarkWatchedRef.current?.(progressKey);
+                }
+                if (mounted) setPlaying(false);
+              })
+              .catch((e) => {
+                if (!mounted) return;
+                setPlaying(false);
+                setAndroidNotice(
+                  `Could not start the player: ${e?.message || "unknown error"}`,
+                );
+              });
+            return;
+          }
           if (res.isDirectMp4 !== undefined && platform.isElectron) {
             window.electron
               .setPlayerVideo({
@@ -717,11 +750,16 @@ export default function MoviePage({
   }, [playing, progressKey, watchedThreshold, playerSource, progressViaFrames]);
 
   const handlePlay = useCallback(() => {
+    if (platform.isAndroid && !isAnime) {
+      setAndroidNotice(ANDROID_ANIME_ONLY);
+      return;
+    }
+    setAndroidNotice(null);
     setM3u8Url(null);
     setInterceptedSubs([]);
     setPlaying(true);
     onHistory({ ...d, media_type: "movie" });
-  }, [d, onHistory]);
+  }, [d, onHistory, isAnime]);
 
   // Intercept fullscreen requests from embedded players (vidsrc / 2embed use
   // the native Fullscreen API which would otherwise fullscreen the entire app).
@@ -973,6 +1011,24 @@ export default function MoviePage({
                 <BackIcon /> Back
               </button>
             </div>
+            {androidNotice && (
+              <div
+                style={{
+                  marginTop: 12,
+                  padding: "8px 12px",
+                  borderRadius: 8,
+                  background: "rgba(255,200,50,0.08)",
+                  border: "1px solid rgba(255,200,50,0.2)",
+                  fontSize: 12,
+                  color: "var(--text3)",
+                  display: "flex",
+                  gap: 8,
+                }}
+              >
+                <span>⚠️</span>
+                <span>{androidNotice}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

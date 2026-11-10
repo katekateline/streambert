@@ -11,6 +11,7 @@
 //   getPlatform() -> Promise<string|null>
 //   resolveHiAnime(args) -> Promise<{ok:true,...}|{ok:false,error}>
 //   onHiAnimeProgress(cb) -> unsubscribe fn
+//   player (android only) { open(args) -> Promise (resolves on close), getProgress(id) }
 
 import { Capacitor } from "@capacitor/core";
 import { electronPlatform } from "./electron";
