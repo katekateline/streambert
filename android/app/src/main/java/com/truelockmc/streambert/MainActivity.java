@@ -9,6 +9,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(SecureStoragePlugin.class);
         registerPlugin(HiAnimePlugin.class);
+        registerPlugin(PlayerPlugin.class);
         super.onCreate(savedInstanceState);
     }
 }
